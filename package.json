@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/karsheng/frontend-nanodegree-mobile-portfolio#readme",
   "devDependencies": {
-    "grunt": "^1.0.1"
+    "grunt": "^1.0.1",
+    "grunt-contrib-htmlmin": "^2.0.0"
   },
   "dependencies": {
     "grunt-responsive-images": "^0.1.9"

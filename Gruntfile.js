@@ -1,14 +1,20 @@
-/*
- After you have changed any settings for the responsive_images task,
- run this with one of these options:
-  "grunt" alone creates a new, completed images directory
-  "grunt clean" removes the images directory
-  "grunt responsive_images" re-processes images without removing the old ones
-*/
-
 module.exports = function(grunt) {
 
   grunt.initConfig({
+    htmlmin: {                                     // Task
+      dist: {                                      // Target
+        options: {                                 // Target options
+          removeComments: true,
+          collapseWhitespace: true,
+          minifyJS: true,
+          minifyCSS: true
+        },
+        files: {                                   // Dictionary of files
+          'dist/index.html': 'src/index.html'     // 'destination': 'source'
+        }
+      }
+    },
+
     responsive_images: {
       dev: {
         options: {
@@ -74,7 +80,8 @@ module.exports = function(grunt) {
 
   });
 
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
   grunt.loadNpmTasks('grunt-responsive-images');
-  grunt.registerTask('default', ['responsive_images']);
+  grunt.registerTask('default', ['htmlmin']);
 
 };
