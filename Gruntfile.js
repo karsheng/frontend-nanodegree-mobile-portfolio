@@ -1,17 +1,40 @@
 module.exports = function(grunt) {
 
   grunt.initConfig({
-    htmlmin: {                                     // Task
-      dist: {                                      // Target
-        options: {                                 // Target options
+    htmlmin: {
+      dist: {
+        options: {
           removeComments: true,
           collapseWhitespace: true,
           minifyJS: true,
           minifyCSS: true
         },
-        files: {                                   // Dictionary of files
-          'dist/index.html': 'src/index.html'     // 'destination': 'source'
+        files: {
+          'dist/index.html': 'src/index.html'
         }
+      }
+    },
+
+    uglify: {
+      options:{
+        mangle: false
+      },
+      my_target: {
+        files: {
+          'dist/js/perfmatters.min.js' : ['src/js/perfmatters.js']
+        }
+      }
+    },
+
+    cssmin: {
+      target: {
+        files: [{
+          expand: true,
+          cwd: 'src/css',
+          src: ['*.css', '!*min.css'],
+          dest: 'dist/css',
+          ext: '.min.css'
+        }]
       }
     },
 
@@ -44,44 +67,17 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           src: ['*.{gif,jpg,png}'],
-          cwd: 'img_src/',
-          dest: 'img/'
+          cwd: 'src/img_src/',
+          dest: 'src/img/'
         }]
       }
-    },
-
-    /* Clear out the images directory if it exists */
-    clean: {
-      dev: {
-        src: ['img'],
-      },
-    },
-
-    /* Generate the images directory if it is missing */
-    mkdir: {
-      dev: {
-        options: {
-          create: ['img']
-        },
-      },
-    },
-
-    /* Copy the "fixed" images that don't go through processing into the images/directory */
-    copy: {
-      dev: {
-        files: [{
-          expand: true,
-          src: ['img_src/fixed/*.{gif,jpg,png}'],
-          dest: 'img/',
-          flatten: true,
-        }]
-      },
-    },
-
+    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-htmlmin');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-responsive-images');
-  grunt.registerTask('default', ['htmlmin']);
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.registerTask('default', ['htmlmin'], ['uglify'], ['responsive_images'], ['cssmin']);
 
 };
