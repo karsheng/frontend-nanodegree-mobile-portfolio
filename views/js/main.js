@@ -421,38 +421,29 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
-  function determineDx (elem, size) {
-    var oldWidth = elem.offsetWidth;
-    var windowWidth = document.querySelector("#randomPizzas").offsetWidth;
-    var oldSize = oldWidth / windowWidth;
-
-    // Changes the slider value to a percent width
-    function sizeSwitcher (size) {
-      switch(size) {
-        case "1":
-          return 0.25;
-        case "2":
-          return 0.3333;
-        case "3":
-          return 0.5;
-        default:
-          console.log("bug in sizeSwitcher");
-      }
-    }
-
-    var newSize = sizeSwitcher(size);
-    var dx = (newSize - oldSize) * windowWidth;
-
-    return dx;
-  }
+  // Removed determineDx function as it is unnesseary to access the window width
+  // to get the size of the pizzas element. This can be done by specifying percentage of
+  // the container's width as per changePizzaSizes function below.
 
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
+    // Sets newWidth of the pizza element based on the size input.
+    switch(size) {
+      case "1":
+        newWidth = 25;
+        break;
+      case "2":
+        newWidth = 33.3;
+        break;
+      case "3":
+        newWidth = 50;
+        break;
+      default:
+        console.log("bug in SizeSwitcher");
+    }
+    var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
     for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+      randomPizzas[i].style.width = newWidth + "%";
     }
   }
 
@@ -501,9 +492,16 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.querySelectorAll('.mover');
+  var items = document.getElementsByClassName('mover');
+  // Originally document.body.scrollTop is called at each step of the loop, as style.left is called afterwards,
+  // this was causing forced synchronous layout.
+  // Hence scrollTop which is used to calculate pizza element phase is moved out of the loop
+  // with declaration of a new variable called scollTop, hence FSL is avoided.
+  //
+  var scrollTop = document.body.scrollTop;
+
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    var phase = Math.sin((scrollTop / 1250) + i % 5);
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
 
@@ -524,7 +522,9 @@ window.addEventListener('scroll', updatePositions);
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  // It is unnesseary to create so many pizzas (200 originally) as we don't see all of them
+  // in the window. Hence the number of pizzas is changed to 50.
+  for (var i = 0; i < 50; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
@@ -532,6 +532,12 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.style.width = "73.333px";
     elem.basicLeft = (i % cols) * s;
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
+    // Using backfaceVisibility to force the browser to render each pizza element in its own layer.
+    // This allows the browser to repaint the pizza more efficiently.
+    // There is a tradeoff between the time required to paint vs. time required for scripting and rendering - as
+    // there are now more layers to create, it will take more time for scripting  and rendering to complete.
+    // In this case the gain in Painting is greater than the loss in Scripting and Rendering, hence this approach is used.
+    elem.style.backfaceVisibility = "hidden";
     document.querySelector("#movingPizzas1").appendChild(elem);
   }
   updatePositions();
